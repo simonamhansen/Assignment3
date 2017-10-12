@@ -1,0 +1,196 @@
+---
+title: "Assignment2_Part1_VoiceInSchizophrenia"
+author: "Simon Hansen"
+date: "October 12, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Assignment 2 - Part 1 - Assessing voice in schizophrenia
+
+Schizophrenia has been associated with "inappropriate" voice, sometimes monotone, sometimes croaky. A few studies indicate that pitch might be an index of schizophrenia. However, an ongoing meta-analysis of the literature (which you will have a go at in the last assignment) indicates that pitch mean and standard deviation are only weak indicators of diagnosis. Can we do better with our new fancy complex skills?
+
+The corpus you are asked to analyse is a set of voice recordings from people with schizophrenia (just after first diagnosis) and 1-1 matched controls (on gender, age, education). Each participant watched 10 videos of triangles moving across the screen and had to describe them (so you have circa 10 recordings per person). I have already extracted the pitch once every 10 milliseconds and you will have to use this data to assess differences in the voice.
+
+N.B. Question to be answered via email to Celine: can you characterize voice in schizophrenia as acoustically different? Report the methods you used to answer this question and the results from the analyses. Add a couple of lines trying to interpret the results (make sense of the difference). E.g. People with schizophrenia tend to have high-pitched voice, and present bigger swings in their prosody than controls. Add a couple of lines describing limitations of the data/analyses if any is relevant.
+
+N.B. There are looots of files to be dealt with. Probably too many for your computer. This is a challenge for you. Some (complementary) possible strategies: You can select a subset of files only (and you have to justify your choice). You can learn how to use the apply() or map() functions. You can coordinate with classmates.
+
+1. In the course of this assignment you have to first select one datafile and figure out how to:
+
+- Extract "standard" descriptors of pitch: Mean, standard deviation, range
+- Extract less "standard" descriptors of pitch you can think of (e.g. median, iqr, mean absoluted deviation, coefficient of variation)
+- Extract "complex" descriptors: recurrence quantification analysis
+
+```{r}
+# Set working directory
+setwd("C:/Users/simon/Google Drev/Uni/Methods3/Assignment_3")
+
+# Loading libraries
+library(raster); library(lsr); library(crqa); library(ggplot2)
+
+# Load in the first datafile
+data1=read.delim("Pitch/Study1D0S102T1_f0.txt")
+
+# Load demodata 
+demo_data = read.delim("DemoData.txt")
+
+# To extract mean
+mean(data1$f0) 
+
+# SD
+sd(data1$f0)
+
+# Range
+range(data1$f0)
+
+# median
+median(data1$f0)
+
+# IQR
+IQR(data1$f0)
+
+# Mean absoluted deviation
+aad(data1$f0)
+
+# Coefficient of variation
+sd(data1$f0)/mean(data1$f0)*100
+
+# Recurrence Quantificantion Analysis
+# To estimate paramters (Dimension, Radius and delay parameter)
+par = list(lgM =  50, steps = seq(1, 6, 1),  radiusspan = 100, radiussample = 40, normalize = 0,  rescale = 0,  mindiagline = 2, minvertline = 2,  tw = 0,  whiteline = FALSE,  recpt = FALSE, fnnpercent = 10,  typeami = "mindip") 
+
+ans= optimizeParam(data1$f0, data1$f0, par, min.rec= 3.5, max.rec=4.5)
+
+results=crqa(data1$f0, data1$f0, delay=ans$delay, embed=ans$emddim, radius=ans$radius,normalize=0,rescale=0,mindiagline = 2,minvertline = 2)
+
+# To view the plot
+RP=results$RP 
+RP = matrix(as.numeric(RP), nrow = ncol(RP))  
+cols = c("white","blue4") 
+image(RP, xlab = "", ylab = "", col = cols)
+
+# Explore lags of coordination 
+Profile=drpdfromts(data1$f0, data1$f0, datatype='continuous', ws=50,radius=ans$radius) 
+timecourse = round( seq(-5000,5000,100)/1000, digit = 1) 
+maxlag = Profile$maxlag/1000 
+profile = Profile$profile*100 
+Prof=data.frame(profile) 
+ggplot(Prof, aes(timecourse,profile))+geom_line()+geom_vline(xintercept = timecourse[maxlag], colour='red')
+
+```
+
+2. Second you will have to turn the code into a function and loop through all the files (or even better use apply/sapply/lapply)
+- Remember to extract the relevant information from the file names (Participant, Diagnosis, Trial, Study)
+
+```{r}
+
+
+mean = NULL
+SD = NULL
+range = NULL
+median = NULL
+IQR = NULL
+MAD = NULL
+COV = NULL
+DET = NULL
+n = 1
+
+files=list.files(path = "Test", pattern = ".txt")
+
+for (file in files){
+  d=read.delim(file)
+  mean[n]=mean(d$f0)
+  SD[n]=sd(d$f0)
+  range[n]=range(d$f0)
+  
+  par = list(lgM =  50, steps = seq(1, 6, 1),  radiusspan = 100,
+  radiussample = 40, normalize = 0,  rescale = 0,  mindiagline = 2,
+  minvertline = 2,  tw = 0,  whiteline = FALSE,  recpt = FALSE,
+  fnnpercent = 10,  typeami = "mindip") 
+
+  ans= try(optimizeParam(d$f0, d$f0, par, min.rec= 3.5,
+                     max.rec=4.5))
+  if (length(ans) > 1) {
+  
+  results=crqa(d$f0, d$f0, delay=ans$delay, embed=ans$emddim,
+               radius=ans$radius,normalize=0,rescale=0,mindiagline = 2,minvertline = 2)
+  
+  DET[n] = results$DET
+  } 
+  
+  else {
+    DET[n] = NA
+  }
+  
+  n=n+1
+}
+
+
+print(mean)
+print(SD)
+print(range)
+print(DET)
+print(ans)
+
+tester6=data.frame(mean, SD, range, DET)
+
+for (dataframe in dataframes) {
+  
+  # Mean
+  mean1 = mean(dataframe$f0) 
+  # SD
+  sd1=sd(dataframe$f0)
+  # Range
+  range1=range(dataframe$f0)
+  # median
+  median1=median(dataframe$f0)
+  # IQR
+  IQR1 = IQR(dataframe$f0)
+  # Mean absoluted deviation
+  aad1 = aad(dataframe$f0)
+  # Coefficient of variation
+  cov1 = sd(dataframe$f0)/mean(dataframe$f0)*100
+  
+  # Recurrence Quantificantion Analysis
+  # To estimate paramters (Dimension, Radius and delay parameter)
+  par = list(lgM =  50, steps = seq(1, 6, 1),  radiusspan = 100,
+  radiussample = 40, normalize = 0,  rescale = 0,  mindiagline = 2,
+  minvertline = 2,  tw = 0,  whiteline = FALSE,  recpt = FALSE,
+  fnnpercent = 10,  typeami = "mindip") 
+
+  ans= optimizeParam(dataframe$f0, dataframe$f0, par, min.rec= 3.5,
+                     max.rec=4.5)
+
+  results=crqa(dataframe$f0, dataframe$f0, delay=ans$delay, embed=ans$emddim,
+               radius=ans$radius,normalize=0,rescale=0,mindiagline = 2,minvertline =
+    2)
+  
+  output = matrix(ncol=mean1, sd1, nrow = 2)
+  
+  
+}
+
+output1 = data.frame(output)
+
+
+
+```
+
+3. Make one model per acoustic feature and test whether you can observe significant difference due to Diagnosis. Tip: Which other fixed factors should you control for (that is, include in the model)? Which random ones?
+- Bonus points: cross-validate the model and report the betas and standard errors from all rounds to get an idea of how robust the estimates are. 
+3a. Is study a significant predictor in these models? What should you infer from this? Does study interact with diagnosis? What should you infer from this?
+
+4. Bonus Question: Compare effect size of diagnosis across the different measures. Which measure seems most sensitive?
+- Tip: to compare across measures you need to put all of them on the same scale, that is, you need to "standardize" them (z-score)
+
+5. Bonus question. In the Clinical Info file you have additional information about the participants. Which additional parameters (e.g. age, gender) should we control for? Report the effects.
+
+6. Write a paragraph reporting methods and results
+
+[Next assignment: can we use these measures to build a tool that diagnoses people from voice only?]
+
+## N.B. Remember to save the acoustic features of voice in a separate file, so to be able to load them next time
