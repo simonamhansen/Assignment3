@@ -257,6 +257,10 @@ mean(comb3_results$AUC) # 0.61
 mean(comb4_results$AUC) # 0.61
 mean(comb5_results$AUC) # 0.617
 
+# To get mean sensitivity and specificity of the best model
+mean(comb1_results$Sensitivity) # 0.58
+mean(comb1_results$Specificity) # 0.54
+
 ```
 
 ### Question 4: Properly report the results
