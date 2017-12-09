@@ -37,6 +37,7 @@ data1=read.delim("Pitch/Study1D0S102T1_f0.txt")
 
 # Load demodata 
 demo_data = read.delim("DemoData.txt")
+arti_data = read.delim("Articulation.txt", sep = ",")
 
 # To extract mean
 mean(data1$f0) 
@@ -200,6 +201,8 @@ Pitch_data$Subject=as.integer(Pitch_data$Subject)
 Pitch_data = read.csv("Pitch_data.csv")
 
 new_data = base::merge(Pitch_data, demo_data, by = c("Subject", "Diagnosis"))
+
+new_data2 = base::merge(new_data)
 
 # To write to a csv file
 write.csv(Pitch_data, "Pitch_data.csv")

@@ -1,6 +1,6 @@
 ---
 title: "Assignment 3 - Part 2 - Diagnosing Schizophrenia from Voice"
-author: "Riccardo Fusaroli"
+author: "Simon Hansen"
 date: "October 17, 2017"
 output: html_document
 ---
@@ -250,7 +250,7 @@ comb5_results = CV_function(NewDATA, Diagnosis ~ SD+ENTR + (1+Trial|Subject))
 
 # To get the mean area under the curve for each model 
 mean(comb1_results$AUC) # 0.62
-mean(comb1_results$Accuracy)
+mean(comb1_results$Accuracy) # 0.58
 mean(comb2_results$AUC) # 0.618
 mean(comb3_results$AUC) # 0.61
 mean(comb4_results$AUC) # 0.61
