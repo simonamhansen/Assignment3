@@ -40,7 +40,7 @@ setwd("C:/Users/simon/Google Drev/Uni/Methods3/Assignment3")
 S_data = read.csv("Schizophrenia_data.csv")
 S_data$Subject = as.factor(S_data$Subject)
 
-# To deleta anoying columns
+# To deleta irrelevant columns
 S_data=S_data[,-1:-2]
 
 # To create a logistic regression
@@ -142,7 +142,6 @@ test_data = data.frame(Accuracy, Sensitivity, Specificity, PPV, NPV, AUC)
 # To get the mean AUC
 mean(test_data$AUC) #0.59
 
-
 ```
 
 
@@ -228,7 +227,6 @@ mean(IQR_results$AUC) # 0.6116
 mean(MAD_reults$AUC) #0.6146
 mean(L_results$AUC) # 0.588
 mean(Lmax_results$AUC) # 0.53
-
 
 ```
 
