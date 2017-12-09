@@ -139,8 +139,11 @@ for (fold in fold_list){
 # To create the dataframe
 test_data = data.frame(Accuracy, Sensitivity, Specificity, PPV, NPV, AUC)
 
-# To get the mean AUC
+# To get the mean values
 mean(test_data$AUC) #0.59
+mean(test_data$Accuracy) # 0.54
+mean(test_data$Sensitivity) #0.71
+mean(test_data$Specificity) #0.38
 
 ```
 
